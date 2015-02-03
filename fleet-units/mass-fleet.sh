@@ -5,4 +5,4 @@ op="start"
 [ "x$1" == "x" ] || op="$1"
 
 # boom!
-fleetctl $op $x zookeeper@{1..3} mesos-master@{1..3} mesos-slave marathon chronos
+fleetctl $op zookeeper@{1..3} mesos-master@{1..3} mesos-slave marathon chronos
