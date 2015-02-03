@@ -1,0 +1,32 @@
+[Unit]
+Description=Apache ZooKeeper
+
+# Requirements
+Requires=docker.service
+
+# Dependency order
+After=docker.service
+
+[Service]
+Restart=on-failure
+RestartSec=20
+TimeoutStartSec=0
+ExecStartPre=-/usr/bin/docker kill zookeeper
+ExecStartPre=-/usr/bin/docker rm zookeeper
+ExecStartPre=-/usr/bin/rm -rf /mnt/data/zookeeper
+ExecStartPre=/usr/bin/mkdir -p /mnt/data/zookeeper
+ExecStartPre=/usr/bin/echo -n %i > /mnt/data/zookeeper/myid
+ExecStart=/usr/bin/docker run --rm \
+    --name zookeeper \
+    --net=host \
+    --volume /mnt/data/zookeeper:/data \
+    172.17.8.101:5000/dockertelaviv/zookeeper
+ExecStop=/usr/bin/docker stop zookeeper
+
+[Install]
+WantedBy=multi-user.target
+
+[X-Fleet]
+# Don't schedule on the same machine as other ZooKeeper instances
+Conflicts=zookeeper@*.service
+MachineMetadata=public_ip=172.17.8.10%i

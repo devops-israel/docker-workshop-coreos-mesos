@@ -1,0 +1,29 @@
+[Unit]
+Description=Docker Registry
+
+# Requirements
+Requires=docker.service
+
+# Dependency order
+After=docker.service
+
+[Service]
+# Let processes take awhile to start up (for first run Docker containers)
+TimeoutStartSec=0
+
+# Get CoreOS environmental variables
+EnvironmentFile=/etc/environment
+
+# Directives with "=-" are allowed to fail without consequence
+ExecStartPre=-/usr/bin/docker rm -f registry
+ExecStartPre=-/usr/bin/docker pull registry
+ExecStart=/usr/bin/docker run --name registry \
+    -p ${COREOS_PUBLIC_IPV4}:5000:5000 \
+    -e SETTINGS_FLAVOR=local \
+    -e DEBUG=true \
+    registry
+
+ExecStop=/usr/bin/docker stop registry
+
+[X-Fleet]
+MachineMetadata=public_ip=172.17.8.101

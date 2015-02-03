@@ -1,0 +1,36 @@
+[Unit]
+Description=MesosSlave
+After=docker.service
+Requires=docker.service
+
+[Service]
+Restart=on-failure
+RestartSec=20
+TimeoutStartSec=0
+EnvironmentFile=/etc/environment
+ExecStartPre=-/usr/bin/docker kill mesos_slave
+ExecStartPre=-/usr/bin/docker rm mesos_slave
+ExecStartPre=/usr/bin/docker pull 172.17.8.101:5000/dockertelaviv/mesos-slave
+ExecStart=/usr/bin/docker run --rm \
+    --name=mesos_slave \
+    --net=host \
+    --privileged \
+    -v /sys:/sys \
+    -v /usr/bin/docker:/usr/bin/docker:ro \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v /lib64/libdevmapper.so.1.02:/lib/libdevmapper.so.1.02:ro \
+    172.17.8.101:5000/dockertelaviv/mesos-slave \
+    --ip=${COREOS_PUBLIC_IPV4} \
+    --hostname=${COREOS_PUBLIC_IPV4} \
+    --containerizers=docker,mesos \
+    --master=zk://172.17.8.101:2181,172.17.8.102:2181,172.17.8.103:2181/mesos \
+    --work_dir=/var/lib/mesos/slave \
+    --log_dir=/var/log/mesos/slave
+ExecStop=/usr/bin/docker stop mesos_slave
+
+[Install]
+WantedBy=multi-user.target
+
+[X-Fleet]
+Global=true
+# Conflicts=mesos-slave@*.service
