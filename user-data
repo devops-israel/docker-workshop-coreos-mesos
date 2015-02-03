@@ -1,0 +1,53 @@
+#cloud-config
+
+coreos:
+  # etcd:
+  #   # generate a new token for each unique cluster from https://discovery.etcd.io/new
+  #   # WARNING: replace each time you 'vagrant destroy'
+  #   #discovery: https://discovery.etcd.io/<token>
+  #   addr: $public_ipv4:4001
+  #   peer-addr: $public_ipv4:7001
+  # fleet:
+  #   public-ip: $public_ipv4
+  #   metadata: public_ip=$public_ipv4
+  units:
+    # - name: etcd.service
+    #   command: start
+    # - name: fleet.service
+    #   command: start
+    - name: docker-tcp.socket
+      command: start
+      enable: true
+      content: |
+        [Unit]
+        Description=Docker Socket for the API
+
+        [Socket]
+        ListenStream=2375
+        Service=docker.service
+        BindIPv6Only=both
+
+        [Install]
+        WantedBy=sockets.target
+
+    - name: registry.service
+      command: start
+      enable: true
+      content: |
+        [Unit]
+        Description=Docker Registry
+        After=docker.service
+
+        [Service]
+        TimeoutStartSec=0
+        EnvironmentFile=/etc/environment
+        ExecStartPre=-/usr/bin/docker rm -f registry
+        ExecStart=/usr/bin/docker run --name registry \
+            -p $public_ipv4:5000:5000 -e SETTINGS_FLAVOR=local registry
+        ExecStop=/usr/bin/docker stop registry
+
+write_files:
+  - path: /etc/systemd/system/docker.service.d/50-insecure-registry.conf
+    content: |
+        [Service]
+        Environment=DOCKER_OPTS='--insecure-registry="172.17.8.101:5000"'
