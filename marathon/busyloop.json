@@ -1,0 +1,13 @@
+{
+  "container": {
+    "type": "DOCKER",
+    "docker": {
+      "image": "busybox:latest"
+    }
+  },
+  "id": "busyloop",
+  "instances": 1,
+  "cpus": 0.5,
+  "mem": 10,
+  "cmd": "while sleep 10; do date -u +%T; done"
+}
