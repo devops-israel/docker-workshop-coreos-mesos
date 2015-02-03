@@ -16,7 +16,7 @@ ExecStartPre=-/usr/bin/docker rm zookeeper
 ExecStartPre=-/usr/bin/rm -rf /mnt/data/zookeeper
 ExecStartPre=/usr/bin/mkdir -p /mnt/data/zookeeper
 ExecStartPre=/usr/bin/echo -n %i > /mnt/data/zookeeper/myid
-ExecStart=/usr/bin/docker run --rm \
+ExecStart=/usr/bin/docker run \
     --name zookeeper \
     --net=host \
     --volume /mnt/data/zookeeper:/data \

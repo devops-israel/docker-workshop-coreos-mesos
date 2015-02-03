@@ -11,7 +11,7 @@ EnvironmentFile=/etc/environment
 ExecStartPre=-/usr/bin/docker kill chronos
 ExecStartPre=-/usr/bin/docker rm chronos
 ExecStartPre=/usr/bin/docker pull 172.17.8.101:5000/dockertelaviv/chronos
-ExecStart=/usr/bin/docker run --rm \
+ExecStart=/usr/bin/docker run \
     --name chronos \
     -p 4400:4400 \
     172.17.8.101:5000/dockertelaviv/chronos \
